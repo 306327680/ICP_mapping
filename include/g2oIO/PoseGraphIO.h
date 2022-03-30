@@ -16,9 +16,8 @@ class PoseGraphIO {
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 public:
 	PoseGraphIO()= default;;
-	void insertPose(Eigen::Isometry3d pose);
+	void insertPose(const Eigen::Isometry3d& pose);
 	void saveGraph(std::string g2o_path);
-	std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> getEigenPoseFromg2oFile(std::string &g2ofilename);
 
 private:
 	std::vector<Eigen::Isometry3d, Eigen::aligned_allocator<Eigen::Isometry3d>> _odom_buffer;

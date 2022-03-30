@@ -20,6 +20,11 @@ ADD_LIBRARY(poseIO SHARED include/g2oIO/PoseGraphIO.h include/g2oIO/PoseGraphIO.
 target_link_libraries(poseIO g2o_core g2o_types_slam3d g2o_stuff g2o_core)
 include_directories(include/g2oIO)
 
+ADD_LIBRARY(registration SHARED include/registration/registration.cpp
+        include/registration/registration.h)
+target_link_libraries(registration ${PCL_LIBRARIES})
+include_directories(include/registration)
+
 add_executable(ICP_mapping main.cpp include/tools/tools.cpp include/tools/tools.h include/mapping/mapping.cpp include/mapping/mapping.h)
 target_link_libraries(ICP_mapping
         poseIO

@@ -4,10 +4,6 @@
 
 #include "PoseGraphIO.h"
 
-void PoseGraphIO::getPose() {
-
-}
-
 void PoseGraphIO::saveGraph(std::string g2o_path) {
 	g2o::SparseOptimizer optimizer;     // 图模型
 	typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 6>> BlockSolverType;
@@ -49,6 +45,6 @@ void PoseGraphIO::saveGraph(std::string g2o_path) {
 	std::cerr << g2o_path<<std::endl;
 }
 
-void PoseGraphIO::insertPose(Eigen::Isometry3d pose) {
+void PoseGraphIO::insertPose(const Eigen::Isometry3d& pose) {
 	_odom_buffer.push_back(pose);
 }

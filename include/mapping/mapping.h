@@ -10,6 +10,7 @@
 #include <pcl/filters/filter.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <PoseGraphIO.h>
+#include <registration.h>
 struct PointXYZIT {
     PCL_ADD_POINT4D
     float intensity;
@@ -30,9 +31,15 @@ public:
     mapping()= default;
     mapping(int s,int e,std::vector<std::string> file_names){start_id_ = s; end_id_ = e;file_names_ = file_names;}
     void start();
+    void linerDistortion(mypcdCloud input, Eigen::Matrix4f increase, pcl::PointCloud<pcl::PointXYZI> &output);
+    registration icp;
 private:
     void readPointCloud(std::string file_names,pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_result,ros::Time& cur_time,
                         mypcdCloud& cloud_for_mapping);
+    void trinterp(Eigen::Matrix4d T0, Eigen::Matrix4d &T1, double r, Eigen::Matrix4d &T);
+    void qinterp(Eigen::Vector4d &Q1, Eigen::Vector4d &Q2, double r,Eigen::Vector4d &q_quaternion_interpolation);
+    void rotMat2quaternion(Eigen::Matrix4d &T, Eigen::Vector4d &q_quaternion);
+    void quatern2rotMat(Eigen::Vector4d &q_quaternion, Eigen::Matrix3d &R);
     std::vector<std::string> file_names_;
     int start_id_ = 0;
     int end_id_ = 0;
