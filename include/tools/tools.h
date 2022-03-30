@@ -9,6 +9,8 @@
 #include <vector>
 #include <dirent.h>
 #include <algorithm>
+//EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::Matrix4d)
+//EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::Isometry3d)
 class tools {
 public:
     //1. Get the name of files
