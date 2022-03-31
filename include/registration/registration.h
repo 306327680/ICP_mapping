@@ -36,17 +36,15 @@ public:
 	//scan-map参数
 	void SetPlaneICP();
 	void SetPlaneICP(int Correspondence);
-	pcl::PointCloud<pcl::PointXYZI> normalIcpRegistration(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
+    void normalIcpRegistration(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
 									 pcl::PointCloud<pcl::PointXYZI> target);
-	pcl::PointCloud<pcl::PointXYZI> normalIcpRegistrationlocal(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
+    void normalIcpRegistrationlocal(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
 														  pcl::PointCloud<pcl::PointXYZI> target);
-	pcl::PointCloud<pcl::PointXYZI>  IcpWithConvriance(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
-															   pcl::PointCloud<pcl::PointXYZI> target, Eigen::MatrixXd &ICP_COV);
-	//PM::TransformationParameters  setScan(pcl::PointCloud<pcl::PointXYZI> pcin);
+
 	Eigen::Matrix4f transform_frame_to_frame = Eigen::Matrix4f::Identity();
 	Eigen::Matrix4f transformation = Eigen::Matrix4f::Identity(); //全局位姿
 	Eigen::Matrix4f icp_init = Eigen::Matrix4f::Identity();//icp的初值
-	Eigen::Matrix4f increase = Eigen::Matrix4f::Identity();//两次icp的结果
+	Eigen::Matrix4f increase = Eigen::Matrix4f::Identity();//两次icp的结果 可以作为匹配的初始值去用
 	//tools ReOrthogonalization 防止累计误差
 	Eigen::Isometry3d  ReOrthogonalization(Eigen::Isometry3d input);
 	pcl::IterativeClosestPointWithNormals<pcl::PointXYZINormal, pcl::PointXYZINormal>::Ptr pcl_plane_plane_icp;

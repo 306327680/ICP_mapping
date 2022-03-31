@@ -9,7 +9,7 @@ void mapping::start() {
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_hesai(new pcl::PointCloud<pcl::PointXYZI>);
     ros::Time cur_time;
     mypcdCloud xyzItime;
-    pcl::PointCloud<pcl::PointXYZI> undistort,undistort_reg;
+    pcl::PointCloud<pcl::PointXYZI> undistort,undistort_reg,result_scan;
     pcl::PointCloud<pcl::PointXYZI>::Ptr undistort_ptr(new pcl::PointCloud<pcl::PointXYZI>);
     std::vector<pcl::PointCloud<pcl::PointXYZI>>  local_map_queue;
     pcl::PointCloud<pcl::PointXYZI> local_map;
@@ -27,14 +27,24 @@ void mapping::start() {
                 linerDistortion(xyzItime,icp.increase.inverse(),undistort);// 上一次的odom 去去除畸变
                 *undistort_ptr = undistort;
                 icp.SetNormalICP(); //设定odom icp参数0.5+acc*0.01
-                undistort_reg = icp.normalIcpRegistration(undistort_ptr,local_map);
+                icp.normalIcpRegistration(undistort_ptr,local_map);
                 icp_odom.push_back(icp.increase);//T_l_l+1
                 //2.3.1 再次去畸变 再次减小范围
                 linerDistortion(xyzItime,icp.increase.inverse(),undistort);//这一次的odom去除畸变
                 local_map = lidarLocalMapDistance(poses,local_map_queue,0.1,20);
                 //scan-local map
                 icp.SetPlaneICP();
-                undistort_reg = icp.normalIcpRegistrationlocal(undistort_ptr,local_map);
+                icp.normalIcpRegistrationlocal(undistort_ptr,local_map);
+                icp_odom.back() = icp_odom.back()*icp.pcl_plane_plane_icp->getFinalTransformation();
+                linerDistortion(xyzItime,icp.increase.inverse(),undistort);
+                //获取当前位置
+                Eigen::Matrix4f current_pose = Eigen::Matrix4f::Identity();
+                for (const auto & k : icp_odom) {
+                    current_pose *= k;
+                }
+                g2osaver.insertPose(Eigen::Isometry3d(current_pose.matrix().cast<double>()));
+                pcl::transformPointCloud(undistort,result_scan,current_pose);//得到最终的tf过的pcd
+                //todo pub 1.current_pose 2.result_scan
             }
         }
     }

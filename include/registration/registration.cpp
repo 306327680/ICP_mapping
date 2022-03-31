@@ -109,7 +109,7 @@ void registration::SetPlaneICP() {
 	this->pcl_plane_plane_icp = icp;
 	
 }
-pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistration(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
+void registration::normalIcpRegistration(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
 																	pcl::PointCloud<pcl::PointXYZI>  target) {
 	//todo 改成xyz
 	pcl::PointCloud<pcl::PointXYZINormal>::Ptr cloud_source_normals(
@@ -118,7 +118,6 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistration(pcl::PointCl
 			new pcl::PointCloud<pcl::PointXYZINormal>());
 	pcl::PointCloud<pcl::PointXYZINormal>::Ptr cloud_target_normals(
 			new pcl::PointCloud<pcl::PointXYZINormal>());
-	pcl::PointCloud<pcl::PointXYZI> tfed;
 	//隔断一下
 	pcl::PointCloud<pcl::PointXYZI>::Ptr target1(new pcl::PointCloud<pcl::PointXYZI>);
 	pcl::copyPointCloud(target,*target1);
@@ -140,9 +139,6 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistration(pcl::PointCl
 	//2.当前的transform 全局准确
  	transformation = icp_init * pcl_plane_plane_icp->getFinalTransformation();//上次结果(结果加预测)
 	increase = increase * pcl_plane_plane_icp->getFinalTransformation();
-	pcl::transformPointCloud(*source, tfed, transformation.matrix());
-	//变化量
-	return tfed;
 }
 //旋转normalize
 Eigen::Isometry3d registration::ReOrthogonalization(Eigen::Isometry3d input)  {
@@ -168,7 +164,7 @@ Eigen::Isometry3d registration::ReOrthogonalization(Eigen::Isometry3d input)  {
  
 }
 //scan 和 map的匹配
-pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistrationlocal(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
+void registration::normalIcpRegistrationlocal(pcl::PointCloud<pcl::PointXYZI>::Ptr source,
 																		 pcl::PointCloud<pcl::PointXYZI> target) {
 	pcl::PointCloud<pcl::PointXYZINormal>::Ptr cloud_source_normals(
 			new pcl::PointCloud<pcl::PointXYZINormal>());
@@ -176,7 +172,7 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistrationlocal(pcl::Po
 			new pcl::PointCloud<pcl::PointXYZINormal>());
 	pcl::PointCloud<pcl::PointXYZINormal>::Ptr cloud_target_normals(
 			new pcl::PointCloud<pcl::PointXYZINormal>());
-	pcl::PointCloud<pcl::PointXYZI> tfed;
+
 	
 	Eigen::Matrix4f transformation_local = Eigen::Matrix4f::Identity(); //全局tf
 	Eigen::Matrix4f icp_init_local = Eigen::Matrix4f::Identity();//初值
@@ -203,9 +199,7 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistrationlocal(pcl::Po
 	increase = increase * pcl_plane_plane_icp->getFinalTransformation();
 	transformation_local = icp_init_local * pcl_plane_plane_icp->getFinalTransformation(); //上次结果(结果加预测)
 	transformation = transformation_local;
-	pcl::transformPointCloud(*source, tfed, transformation.matrix());
-	//变化量
-	return tfed;
+
 }
 
 void registration::SetNormalICP(int Correspondence) {
