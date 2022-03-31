@@ -28,5 +28,6 @@ include_directories(include/registration)
 add_executable(ICP_mapping main.cpp include/tools/tools.cpp include/tools/tools.h include/mapping/mapping.cpp include/mapping/mapping.h)
 target_link_libraries(ICP_mapping
         poseIO
+        registration
         ${PCL_LIBRARIES}
         ${roscpp_LIBRARIES})

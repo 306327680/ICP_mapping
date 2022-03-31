@@ -124,34 +124,22 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistration(pcl::PointCl
 	pcl::copyPointCloud(target,*target1);
 	pcl::PointCloud<pcl::PointXYZI>::Ptr source1(new pcl::PointCloud<pcl::PointXYZI>);
 	pcl::copyPointCloud(*source,*source1);
-	util tools;
-	tools.timeCalcSet("1.计算normal时间");
 	addNormal(source1, cloud_source_normals);
 	addNormal(target1, cloud_target_normals);
-	tools.timeUsed();
 	*cloud_source_normals_temp = *cloud_source_normals;
 	//0. 当前预测量 = 上次位姿态*增量
 	icp_init = transformation * increase;
-	
 	//去除累计误差
 	icp_init = ReOrthogonalization(Eigen::Isometry3d(icp_init.matrix().cast<double>())).matrix().cast<float>();
 	//1.转换点云 给一个初值
 	pcl::transformPointCloud(*cloud_source_normals_temp, *cloud_source_normals, icp_init.matrix());
-
 	pcl_plane_plane_icp->setInputSource(cloud_source_normals);
 	pcl_plane_plane_icp->setInputTarget(cloud_target_normals);
 	pcl_plane_plane_icp->align(*cloud_source_normals);
 	//todo 感觉不太对,这个increase 在别处不一定准确,还是应该转到上一个的坐标
 	//2.当前的transform 全局准确
  	transformation = icp_init * pcl_plane_plane_icp->getFinalTransformation();//上次结果(结果加预测)
-	//计算不带increase的increase 1上次位姿 * 预测 * 预测的调整 是错的 应该是 :
-	//实际增量 = 上次增量* icp算出的增量误差
-	//上面那个也不对
-	//increase = transformation * increase * pcl_plane_plane_icp->getFinalTransformation();
 	increase = increase * pcl_plane_plane_icp->getFinalTransformation();
-/*	std::cout << "1.T_l-1_l - T_l_l+1 : \n" <<   pcl_plane_plane_icp->getFinalTransformation() << std::endl;
-	std::cout << "2.T_l_l1 :\n" << increase << std::endl;
-	std::cout << "3.第一次分数 : " << pcl_plane_plane_icp->getFitnessScore() << std::endl;*/
 	pcl::transformPointCloud(*source, tfed, transformation.matrix());
 	//变化量
 	return tfed;
@@ -195,32 +183,11 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistrationlocal(pcl::Po
 	//隔断一下
 	pcl::PointCloud<pcl::PointXYZI>::Ptr target1(new pcl::PointCloud<pcl::PointXYZI>);
 	pcl::copyPointCloud(target,*target1);
-	util tools;
-	
-/*	addNormalRadius(source, cloud_source_normals);
-	addNormalRadius(target1, cloud_target_normals);*/
+
 	addNormal(source, cloud_source_normals);
 	addNormal(target1, cloud_target_normals);//map
-	//mls 滤波
-	 // Create a KD-Tree
-/*	pcl::PointCloud<pcl::PointNormal> mls_points;
-  	pcl::search::KdTree<pcl::PointXYZI>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZI>);
-	pcl::MovingLeastSquares<pcl::PointXYZI, pcl::PointNormal> mls;
-	mls.setComputeNormals (true);
-	// Set parameters
-	mls.setInputCloud (target1);
-	mls.setPolynomialOrder (2);
-	mls.setSearchMethod (tree);
-	mls.setSearchRadius (0.03);
-	// Reconstruct
-	mls.process (mls_points);
-	// Save output
-	pcl::io::savePCDFile ("bun0-mls.pcd", mls_points);*/
-	
+
 	local_map_with_normal = *cloud_target_normals;
-	tools.timeUsed();
-	
-	tools.timeCalcSet("2.1 icp求解时间");
 	*cloud_source_normals_temp = *cloud_source_normals;
 	//0. 上次位姿态*增量
 	icp_init_local = transformation;
@@ -228,7 +195,6 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistrationlocal(pcl::Po
 	icp_init_local = ReOrthogonalization(Eigen::Isometry3d(icp_init_local.matrix().cast<double>())).matrix().cast<float>();
 	//1.转换点云 给一个初值
 	pcl::transformPointCloud(*cloud_source_normals_temp, *cloud_source_normals, icp_init_local.matrix());
-
 	pcl_plane_plane_icp->setInputSource(cloud_source_normals);
 	pcl_plane_plane_icp->setInputTarget(cloud_target_normals);
 	pcl_plane_plane_icp->align(*cloud_source_normals);
@@ -237,10 +203,6 @@ pcl::PointCloud<pcl::PointXYZI> registration::normalIcpRegistrationlocal(pcl::Po
 	increase = increase * pcl_plane_plane_icp->getFinalTransformation();
 	transformation_local = icp_init_local * pcl_plane_plane_icp->getFinalTransformation(); //上次结果(结果加预测)
 	transformation = transformation_local;
-	tools.timeUsed();
-	
-/*	std::cout << "2.2 T_scan_l_l+1 - Tmap_l_l+1 \n"  << pcl_plane_plane_icp->getFinalTransformation() << std::endl;
-	std::cout << "2.3 第二次分数 : "  << pcl_plane_plane_icp->getFitnessScore()  << std::endl;*/
 	pcl::transformPointCloud(*source, tfed, transformation.matrix());
 	//变化量
 	return tfed;

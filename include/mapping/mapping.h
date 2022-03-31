@@ -9,6 +9,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/filters/filter.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/voxel_grid.h>
 #include <PoseGraphIO.h>
 #include <registration.h>
 struct PointXYZIT {
@@ -40,6 +41,9 @@ private:
     void qinterp(Eigen::Vector4d &Q1, Eigen::Vector4d &Q2, double r,Eigen::Vector4d &q_quaternion_interpolation);
     void rotMat2quaternion(Eigen::Matrix4d &T, Eigen::Vector4d &q_quaternion);
     void quatern2rotMat(Eigen::Vector4d &q_quaternion, Eigen::Matrix3d &R);
+    pcl::PointCloud<pcl::PointXYZI>
+    lidarLocalMapDistance(std::vector<Eigen::Matrix4f> &poses, std::vector<pcl::PointCloud<pcl::PointXYZI>> &clouds,
+                          double distiance, int buffer_size);
     std::vector<std::string> file_names_;
     int start_id_ = 0;
     int end_id_ = 0;
